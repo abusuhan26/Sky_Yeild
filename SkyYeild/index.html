@@ -1,1 +1,270 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SkyYield — Mutation Calculator</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <script src="https://code.highcharts.com/highcharts.js"></script>
+    <script src="https://code.highcharts.com/highcharts-3d.js"></script>
+    <script src="https://code.highcharts.com/modules/accessibility.js"></script>
+</head>
+<body>
 
+<!-- Animated background blobs -->
+<div class="bg-scene" aria-hidden="true">
+    <div class="bg-blob bg-blob--1"></div>
+    <div class="bg-blob bg-blob--2"></div>
+    <div class="bg-blob bg-blob--3"></div>
+    <div class="bg-blob bg-blob--4"></div>
+</div>
+
+<div id="tooltip" class="glass-tooltip-pop"></div>
+
+<!-- ═══════════════════════════════════════════════════ HEADER ══ -->
+<header class="site-header glass-panel">
+    <div class="header-left">
+        <div class="logo-slot" id="logoSlot" title="Logo placeholder">
+            <span class="logo-star">✦</span>
+        </div>
+        <h1 class="site-title">
+            <span class="sky">Sky</span><span class="yield-word">Yield</span>
+        </h1>
+    </div>
+    <div class="header-right">
+        <div class="tools-menu-wrap">
+            <button class="glass-btn tools-menu-btn" id="toolsMenuBtn" aria-label="Open tools menu">🧰 Tools</button>
+            <div class="glass-panel tools-menu-dropdown" id="toolsMenuDropdown">
+                <button class="tools-menu-item active" disabled><span class="tmi-check">✓</span> Mutation Calculator</button>
+                <button class="tools-menu-item" disabled>Bazaar Flip Finder <span class="tmi-soon">Soon</span></button>
+                <button class="tools-menu-item" disabled>Profit Planner <span class="tmi-soon">Soon</span></button>
+            </div>
+        </div>
+        <button class="glass-btn theme-toggle" id="themeToggle" aria-label="Toggle dark mode">
+            <span class="icon-dark">☀️</span>
+            <span class="icon-light">🌙</span>
+        </button>
+    </div>
+</header>
+
+<!-- ═══════════════════════════════════════════════════ DASHBOARD ══ -->
+<div class="dashboard">
+
+    <!-- ──── LEFT: Mutation Grid ──── -->
+    <aside class="glass-panel grid-panel">
+        <div class="panel-header">
+            <span class="panel-title">Mutations</span>
+            <div class="sort-toggle" id="sortToggle">
+                <button class="sort-btn active" data-sort="alpha-az">A→Z</button>
+                <button class="sort-btn" data-sort="alpha-za">Z→A</button>
+                <button class="sort-btn" data-sort="tier-asc">Tier ↑</button>
+                <button class="sort-btn" data-sort="tier-desc">Tier ↓</button>
+            </div>
+            <input type="text" id="searchBar" class="glass-input search-bar" placeholder="🔍 Search mutations…" aria-label="Search mutations">
+        </div>
+        <div class="grid-container" id="mutationGrid"></div>
+    </aside>
+
+    <!-- ──── RIGHT: Main Panel ──── -->
+    <main class="glass-panel main-panel">
+
+        <!-- TABS -->
+        <div class="tabs">
+            <button class="tab active" data-tab="calculator">⚗️ Calculator</button>
+            <button class="tab" data-tab="compare">⚖️ Compare</button>
+            <button class="tab" data-tab="rankings">🏆 Rankings</button>
+            <button class="tab" data-tab="favourites">⭐ Favourites</button>
+        </div>
+
+        <!-- ════ TAB: CALCULATOR ════ -->
+        <div class="tab-content active" id="tab-calculator">
+
+            <!-- Hero stats row -->
+            <div class="hero-stats">
+                <div class="hero-card gold-card">
+                    <span class="hero-label">Coins / Hour</span>
+                    <span class="hero-value" id="coinsPerHour">—</span>
+                </div>
+                <div class="hero-card">
+                    <span class="hero-label">Total Coins</span>
+                    <span class="hero-value" id="totalCoinsDisplay">—</span>
+                </div>
+                <div class="hero-card">
+                    <span class="hero-label">Growth Time</span>
+                    <span class="hero-value" id="growthTimeDisplay">—</span>
+                </div>
+                <div class="hero-card">
+                    <span class="hero-label">Coins / Stage</span>
+                    <span class="hero-value" id="coinsPerStage">—</span>
+                </div>
+            </div>
+
+            <!-- ── Stage Timeline ── -->
+            <div class="section-label">Stage Timeline</div>
+            <div class="planted-at-row">
+                <div class="input-group planted-at-group">
+                    <label for="plantedAt">Planted At</label>
+                    <input type="datetime-local" id="plantedAt" class="glass-input">
+                </div>
+                <button class="glass-btn action-btn" id="plantNowBtn">Plant Now</button>
+                <button class="glass-btn export-btn" id="exportStagesBtn">⬇ Export .txt</button>
+            </div>
+            <div class="stage-timeline-box glass-inset" id="stageTimelineList"></div>
+
+            <!-- ── Yield Modifiers ── -->
+            <div class="section-label">Yield Modifiers</div>
+            <div class="inputs-grid">
+                <div class="input-group">
+                    <label for="uniqueYield">Unique Yield</label>
+                    <div class="input-suffix-wrap">
+                        <input type="number" id="uniqueYield" value="0" step="any" class="glass-input">
+                        <span class="suffix">%</span>
+                    </div>
+                </div>
+                <div class="input-group">
+                    <label for="plantYield">Plant Yield</label>
+                    <div class="input-suffix-wrap">
+                        <input type="number" id="plantYield" value="0" step="any" class="glass-input">
+                        <span class="suffix">%</span>
+                    </div>
+                </div>
+                <div class="input-group">
+                    <label for="effectYield">Crop Effect Yield</label>
+                    <div class="input-suffix-wrap">
+                        <input type="number" id="effectYield" value="0" step="any" class="glass-input">
+                        <span class="suffix">%</span>
+                    </div>
+                </div>
+                <div class="input-group">
+                    <label for="chipYield">Chip Yield</label>
+                    <div class="input-suffix-wrap">
+                        <input type="number" id="chipYield" value="0" step="any" class="glass-input">
+                        <span class="suffix">%</span>
+                    </div>
+                </div>
+                <div class="input-group">
+                    <label for="fortune">Fortune</label>
+                    <div class="input-suffix-wrap">
+                        <input type="number" id="fortune" value="0" step="any" class="glass-input">
+                        <span class="suffix">%</span>
+                    </div>
+                </div>
+                <div class="input-group">
+                    <label for="mutationsPerPlot">Mutations / Plot</label>
+                    <input type="number" id="mutationsPerPlot" value="1" min="1" class="glass-input">
+                </div>
+                <div class="input-group">
+                    <label for="plotNumber">Plot Count <span class="badge">Max 3</span></label>
+                    <input type="number" id="plotNumber" value="1" min="1" max="3" class="glass-input">
+                </div>
+            </div>
+
+            <!-- ── Growth Formula ── -->
+            <div class="section-label">Growth Formula</div>
+            <div class="inputs-grid">
+                <div class="input-group">
+                    <label for="uniqueCrops">Unique Crops <span class="badge">0–12</span></label>
+                    <input type="number" id="uniqueCrops" value="0" min="0" max="12" class="glass-input">
+                </div>
+                <div class="input-group">
+                    <label for="cropGrowth">Crop Growth</label>
+                    <input type="number" id="cropGrowth" value="0" min="0" step="any" class="glass-input">
+                </div>
+                <div class="input-group">
+                    <label for="ghUpgrade">GreenHouse Speed Upgrade <span class="badge">0–9</span></label>
+                    <input type="number" id="ghUpgrade" value="0" min="0" max="9" class="glass-input">
+                </div>
+            </div>
+
+            <!-- ── Crop Breakdown ── -->
+            <div class="section-label">Crop Breakdown</div>
+            <div class="breakdown-layout">
+                <!-- Column Chart: NPC vs Bazaar per crop -->
+                <div class="column-chart-wrap">
+                    <div id="cropColumnChart"></div>
+                </div>
+                <!-- 3D Pie chart -->
+                <div class="pie-wrap">
+                    <div id="pieChart"></div>
+                </div>
+                <!-- NPC vs Bazaar side by side -->
+                <div class="profit-columns">
+                    <div class="profit-col glass-inset" id="npcCol">
+                        <div class="profit-col-header">
+                            <span class="profit-col-title">🏪 NPC Sell</span>
+                            <span class="profit-col-total" id="npcColTotal">—</span>
+                        </div>
+                        <div class="profit-col-rows" id="npcRows"></div>
+                        <div class="profit-col-footer">
+                            <span class="profit-col-label">Expected<br>Earnings</span>
+                            <span class="profit-col-earn gold" id="npcEarnings">—</span>
+                        </div>
+                    </div>
+                    <div class="profit-col glass-inset" id="bzCol">
+                        <div class="profit-col-header">
+                            <span class="profit-col-title">📈 Bazaar Sell</span>
+                            <span class="bazaar-live-badge" id="bazaarLiveBadge">Not loaded</span>
+                            <button class="glass-btn bz-refresh-btn" id="bazaarRefreshBtn" title="Refresh Bazaar">🔄</button>
+                        </div>
+                        <div class="profit-col-rows" id="bzRows"></div>
+                        <div class="profit-col-footer">
+                            <span class="profit-col-label">Expected<br>Earnings</span>
+                            <span class="profit-col-earn gold" id="bzEarnings">—</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div><!-- /tab-calculator -->
+
+        <!-- ════ TAB: COMPARE ════ -->
+        <div class="tab-content" id="tab-compare">
+            <div class="compare-selectors">
+                <div class="compare-select-group">
+                    <label class="compare-select-label">Mutation A</label>
+                    <div class="custom-select-wrap" id="selectWrapA">
+                        <div class="custom-select-trigger glass-input" id="selectTriggerA" tabindex="0">
+                            <img class="cs-img" id="selectImgA" src="" alt="">
+                            <span class="cs-name" id="selectNameA">—</span>
+                            <span class="cs-arrow">▾</span>
+                        </div>
+                        <div class="custom-select-dropdown glass-panel" id="selectDropdownA"></div>
+                    </div>
+                </div>
+                <div class="compare-vs">VS</div>
+                <div class="compare-select-group">
+                    <label class="compare-select-label">Mutation B</label>
+                    <div class="custom-select-wrap" id="selectWrapB">
+                        <div class="custom-select-trigger glass-input" id="selectTriggerB" tabindex="0">
+                            <img class="cs-img" id="selectImgB" src="" alt="">
+                            <span class="cs-name" id="selectNameB">—</span>
+                            <span class="cs-arrow">▾</span>
+                        </div>
+                        <div class="custom-select-dropdown glass-panel" id="selectDropdownB"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="compare-cards" id="compareCards"></div>
+        </div>
+
+        <!-- ════ TAB: RANKINGS ════ -->
+        <div class="tab-content" id="tab-rankings">
+            <div class="rankings-note glass-inset">Ranked by Coins/Hour using your current inputs. Update inputs in Calculator to refresh.</div>
+            <div class="rankings-list" id="rankingsList"></div>
+        </div>
+
+        <!-- ════ TAB: FAVOURITES ════ -->
+        <div class="tab-content" id="tab-favourites">
+            <div class="fav-empty" id="favEmpty">No favourites yet!<br><span style="font-size:13px;opacity:0.5">Click ⭐ on any mutation to save it here.</span></div>
+            <div class="grid-container fav-grid" id="favGrid"></div>
+        </div>
+
+    </main>
+</div>
+
+<script src="database.js"></script>
+<script src="script.js"></script>
+</body>
+</html>
