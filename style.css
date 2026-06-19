@@ -124,7 +124,7 @@ body {
     width: 350px; height: 350px;
     bottom: 20%; left: 10%;
     background: var(--blob-4);
-    animation: blobFloat1 20s ease-in-out infinite reverse;
+    animation: blobFloat4 20s ease-in-out infinite;
 }
 
 @keyframes blobFloat1 {
@@ -140,6 +140,11 @@ body {
 @keyframes blobFloat3 {
     0%,100% { transform: translate(-50%,-50%) scale(1); }
     50%      { transform: translate(-50%,-50%) scale(1.15) rotate(20deg); }
+}
+@keyframes blobFloat4 {
+    0%,100% { transform: translate(0,0) scale(1); }
+    35%      { transform: translate(-40px,-50px) scale(1.12); }
+    65%      { transform: translate(30px,40px) scale(0.98); }
 }
 
 /* ── Glass base ─────────────────────────────────────── */
@@ -575,13 +580,13 @@ input[type="datetime-local"]:focus { border-color: var(--accent); box-shadow: 0 
    ═══════════════════════════════════════════════════ */
 .breakdown-layout {
     display: grid;
-    grid-template-columns: auto 1fr;
+    grid-template-columns: 1fr;
     gap: 18px;
     align-items: start;
     margin-top: 8px;
 }
 
-/* Column chart spans both columns */
+/* Column chart spans full width */
 .column-chart-wrap {
     grid-column: 1 / -1;
     background: var(--glass-inset-bg);
@@ -591,12 +596,20 @@ input[type="datetime-local"]:focus { border-color: var(--accent); box-shadow: 0 
 }
 #cropColumnChart { width: 100%; height: 240px; }
 
-/* Pie chart */
+/* Pie chart — now larger and full width */
 .pie-wrap {
     display: flex; flex-direction: column; align-items: center; gap: 12px;
-    min-width: 260px;
+    width: 100%;
+    background: var(--glass-inset-bg);
+    border: 1px solid var(--glass-inset-border);
+    border-radius: var(--r-lg);
+    padding: 16px;
 }
-#pieChart { width: 260px; height: 280px; }
+#pieChart { 
+    width: 100%; 
+    height: 380px; 
+    max-width: 600px;
+}
 
 /* Profit columns */
 .profit-columns {
@@ -653,7 +666,7 @@ input[type="datetime-local"]:focus { border-color: var(--accent); box-shadow: 0 
 }
 
 /* ═══════════════════════════════════════════════════
-   COMPARE TAB — Custom animated dropdowns
+   COMPARE TAB — Custom animated dropdowns (FIXED)
    ═══════════════════════════════════════════════════ */
 .compare-selectors {
     display: flex; align-items: center; gap: 16px; margin-bottom: 20px;
@@ -684,6 +697,11 @@ input[type="datetime-local"]:focus { border-color: var(--accent); box-shadow: 0 
     display: none;
     flex-direction: column; gap: 2px;
     transform-origin: top center;
+    background: var(--glass-bg);
+    backdrop-filter: var(--glass-blur);
+    -webkit-backdrop-filter: var(--glass-blur);
+    border: 1px solid var(--glass-border);
+    box-shadow: var(--glass-shadow);
 }
 .custom-select-dropdown.open {
     display: flex;
@@ -702,6 +720,7 @@ input[type="datetime-local"]:focus { border-color: var(--accent); box-shadow: 0 
     padding: 8px 10px; border-radius: var(--r-sm); cursor: pointer;
     transition: background 0.15s; font-size: 13px; font-weight: 500;
     border-left: 2px solid transparent;
+    color: var(--text);
 }
 .cs-option:hover { background: var(--glass-hover); }
 .cs-option.selected { background: var(--accent-glow); border-left-color: var(--accent); }
@@ -793,8 +812,8 @@ input[type="datetime-local"]:focus { border-color: var(--accent); box-shadow: 0 
     .compare-cards { grid-template-columns: 1fr; }
     .rank-stats { display: none; }
     .breakdown-layout { grid-template-columns: 1fr; }
-    .pie-wrap { flex-direction: row; flex-wrap: wrap; min-width: unset; }
-    #pieChart { width: 100%; height: 220px; }
+    .pie-wrap { flex-direction: column; min-width: unset; width: 100%; }
+    #pieChart { width: 100%; height: 340px; }
     #cropColumnChart { height: 200px; }
 }
 
@@ -805,6 +824,7 @@ input[type="datetime-local"]:focus { border-color: var(--accent); box-shadow: 0 
     .tab { padding: 12px 10px; font-size: 12px; }
     .planted-at-row { flex-wrap: wrap; }
     .profit-columns { grid-template-columns: 1fr; }
+    #pieChart { height: 300px; }
 }
 /* ═══════════════════════════════════════════════════
    HIGHCHARTS CUSTOM TOOLTIPS
